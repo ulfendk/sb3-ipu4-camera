@@ -94,9 +94,9 @@ pipeline on frames left in `/dev/shm`.
   `raw_hold.c`, service and udev files) is based on the
   `contrib/sb3-ipu4-cameras` overlay by **popos123** in
   [linux-surface PR #2289](https://github.com/linux-surface/linux-surface/pull/2289),
-  which carries **no explicit licence**. `front_isp.py`, the IR-sensor wait
-  fix and the kernel-check hook are new here. Until the original author
-  licenses that code, this repository is not cleared for public release.
+  which carries **no explicit licence**; it is included here with credit,
+  and will be removed or relicensed at the author's request. `front_isp.py`,
+  the IR-sensor wait fix and the kernel-check hook are new here.
 - `kernel/ipu4-20191030.bin`: Intel IPU4P firmware (from the Windows
   "Intel - Camera - 42.18362.3.16827" driver, as published by
   ruslanbay/ipu4-drivers), under
