@@ -1,0 +1,29 @@
+[Unit]
+Description=Surface Book 3 webcams (IPU4 -> v4l2loopback)
+Requires=sb3-ipu4-cameras.service
+After=sb3-ipu4-cameras.service systemd-modules-load.service systemd-udevd.service
+ConditionKernelVersion=*surface-ipu4*
+ConditionPathExists=/dev/video60
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+[Service]
+Type=simple
+Group=video
+RuntimeDirectory=surface-webcam
+Environment=PYTHONPATH=/opt/surface-cameras/lib
+# IR (ov7251) is not used on this machine.
+Environment=SURFACE_WEBCAM_IR=0
+EnvironmentFile=-/etc/default/surface-webcam
+ExecStartPre=/bin/mkdir -p /run/surface-howdy
+ExecStart=/usr/bin/python3 -u /opt/surface-cameras/tools/surface_webcamd.py
+Restart=on-failure
+RestartSec=8
+Nice=-5
+# Take raw_hold down with the daemon; an orphaned hold keeps the sensor
+# streaming and the next daemon cannot restart it ("ov5693 not suspended").
+KillMode=mixed
+TimeoutStopSec=12
+
+[Install]
+WantedBy=multi-user.target

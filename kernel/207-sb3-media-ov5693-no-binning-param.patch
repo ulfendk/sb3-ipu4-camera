@@ -1,0 +1,41 @@
+Subject: [PATCH] media: ov5693: add no_binning module parameter
+
+--- a/drivers/media/i2c/ov5693.c	2026-10-22 12:05:23.949626152 +0200
++++ b/drivers/media/i2c/ov5693.c	2026-10-22 12:05:23.975145672 +0200
+@@ -55,6 +55,15 @@
+ MODULE_PARM_DESC(mipi_ctrl00,
+ 		 "OV5693 MIPI_CTRL00 (0x4800) at stream-on; 0=skip (Windows=0x2d)");
+ 
++/*
++ * IPU4P (SB3/SP7): 2x2-binned modes never get D-PHY clock-lane lock
++ * (ruslanbay/ipu4-drivers ConsultingFuture4200 0060). When set, only
++ * the full crop is offered; userspace must scale.
++ */
++static bool no_binning;
++module_param(no_binning, bool, 0644);
++MODULE_PARM_DESC(no_binning, "Disable 2x2 binned modes (IPU4P D-PHY lock)");
++
+ #define OV5693_REG_CHIP_ID			CCI_REG16(0x300a)
+ /* Yes, this is right. The datasheet for the OV5693 gives its ID as 0x5690 */
+ #define OV5693_CHIP_ID				0x5690
+@@ -922,6 +931,10 @@
+ 			 DIV_ROUND_CLOSEST(crop->width, width), 1, 2);
+ 	vratio = clamp_t(unsigned int,
+ 			 DIV_ROUND_CLOSEST(crop->height, height), 1, 2);
++	if (no_binning) {
++		hratio = 1;
++		vratio = 1;
++	}
+ 
+ 	fmt = __ov5693_get_pad_format(ov5693, state, format->pad,
+ 				      format->which);
+@@ -1148,7 +1161,8 @@
+ 	struct ov5693_device *ov5693 = to_ov5693_sensor(sd);
+ 	struct v4l2_rect *__crop;
+ 
+-	if (fse->index > 1 || fse->code != MEDIA_BUS_FMT_SBGGR10_1X10)
++	if (fse->index > (no_binning ? 0 : 1) ||
++	    fse->code != MEDIA_BUS_FMT_SBGGR10_1X10)
+ 		return -EINVAL;
+ 
+ 	__crop = __ov5693_get_pad_crop(ov5693, state, fse->pad, fse->which);

@@ -1,0 +1,8 @@
+# makepkg output and downloads
+src/
+pkg/
+*.pkg.tar*
+*.log
+kernel/linux-*.tar.*
+kernel/linux-v*.patch.zst*
+__pycache__/

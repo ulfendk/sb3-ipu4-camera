@@ -1,0 +1,29 @@
+Subject: [PATCH] media: ipu4p: opt-in CSI-2 error IRQs on SB3 front port
+
+--- a/drivers/media/pci/intel/ipu4/ipu4p-isys-csi2.c	2026-10-22 15:50:43.108132638 +0200
++++ b/drivers/media/pci/intel/ipu4/ipu4p-isys-csi2.c	2026-10-22 15:50:43.131765666 +0200
+@@ -85,6 +85,15 @@
+ MODULE_PARM_DESC(sb3_front_lane_reg,
+ 		 "SB3 front: NOF_ENABLED_LANES value (-1 = nlanes)");
+ 
++/*
++ * Front error IRQs are masked (flood → black screen), so receiver_errors
++ * never latches and every snapshot reads err=0. Opt in for diagnosis.
++ */
++static bool sb3_front_err_irq;
++module_param(sb3_front_err_irq, bool, 0644);
++MODULE_PARM_DESC(sb3_front_err_irq,
++		 "SB3 front: enable CSI-2 receiver error IRQs on port 2");
++
+ static void ipu4p_csi2_write_settle(struct ipu_isys_csi2 *csi2,
+ 				    unsigned int nlanes,
+ 				    unsigned int clk_ticks,
+@@ -450,7 +459,7 @@
+ 	writel(1, isys_base +
+ 		   IPU_REG_ISYS_CSI_IRQ_CTRL_BASE(csi2->index) + 0x10);
+ 
+-	if (csi2->index != 2)
++	if (csi2->index != 2 || sb3_front_err_irq)
+ 		csi2part |= 0xffff;
+ 	writel(csi2part, isys_base +
+ 		   IPU_REG_ISYS_CSI_IRQ_CTRL0_BASE(csi2->index));

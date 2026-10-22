@@ -1,0 +1,37 @@
+pkgname=sb3-ipu4-cameras
+pkgver=0.2
+pkgrel=8
+pkgdesc='Surface Book 3 IPU4P camera bring-up and webcams for linux-surface-ipu4'
+arch=(x86_64)
+license=(GPL-2.0-only)
+depends=(bash systemd kmod v4l-utils v4l2loopback-dkms python python-numpy python-opencv ffmpeg)
+install=sb3-ipu4-cameras.install
+source=(sb3-ipu4-cameras.sh sb3-ipu4-cameras.service
+        surface-webcam.service surface_webcamd.py raw_hold.c
+        ipu_guard.py pycompat.py surface_cam.py front_isp.py
+        99-surface-v4l2loopback.conf surface-v4l2loopback.conf
+        90-surface-ipu4-cameras.rules 99-surface-v4l2loopback.rules
+        sb3-ipu4-front.conf kernel-check.sh sb3-ipu4-kernel-check.hook)
+sha256sums=(SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP SKIP)
+
+build() {
+  cc $CFLAGS -O2 -Wall -o raw_hold raw_hold.c $LDFLAGS
+}
+
+package() {
+  install -Dm755 sb3-ipu4-cameras.sh "$pkgdir/usr/lib/sb3-ipu4/sb3-ipu4-cameras.sh"
+  install -Dm644 sb3-ipu4-cameras.service "$pkgdir/usr/lib/systemd/system/sb3-ipu4-cameras.service"
+  install -Dm644 surface-webcam.service "$pkgdir/usr/lib/systemd/system/surface-webcam.service"
+
+  # webcamd resolves raw_hold and its libs relative to /opt/surface-cameras
+  install -Dm755 surface_webcamd.py "$pkgdir/opt/surface-cameras/tools/surface_webcamd.py"
+  install -Dm755 raw_hold "$pkgdir/opt/surface-cameras/tools/raw_hold"
+  install -Dm644 -t "$pkgdir/opt/surface-cameras/lib" ipu_guard.py pycompat.py surface_cam.py front_isp.py
+
+  install -Dm644 99-surface-v4l2loopback.conf "$pkgdir/usr/lib/modprobe.d/99-surface-v4l2loopback.conf"
+  install -Dm644 sb3-ipu4-front.conf "$pkgdir/usr/lib/modprobe.d/sb3-ipu4-front.conf"
+  install -Dm644 surface-v4l2loopback.conf "$pkgdir/usr/lib/modules-load.d/surface-v4l2loopback.conf"
+  install -Dm755 kernel-check.sh "$pkgdir/usr/lib/sb3-ipu4/kernel-check.sh"
+  install -Dm644 sb3-ipu4-kernel-check.hook "$pkgdir/usr/share/libalpm/hooks/sb3-ipu4-kernel-check.hook"
+  install -Dm644 -t "$pkgdir/usr/lib/udev/rules.d" 90-surface-ipu4-cameras.rules 99-surface-v4l2loopback.rules
+}

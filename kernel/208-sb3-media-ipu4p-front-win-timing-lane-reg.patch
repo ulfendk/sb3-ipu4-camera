@@ -1,0 +1,77 @@
+Subject: [PATCH] media: ipu4p: SB3 front Windows receiver timing and lane-count override
+
+--- a/drivers/media/pci/intel/ipu4/ipu4p-isys-csi2.c	2026-10-22 15:27:45.883214643 +0200
++++ b/drivers/media/pci/intel/ipu4/ipu4p-isys-csi2.c	2026-10-22 15:27:45.907515499 +0200
+@@ -64,6 +64,27 @@
+ MODULE_PARM_DESC(sb3_front_data_ticks,
+ 		 "SB3 front: SETTLE_DLANE ticks (0=keep calc)");
+ 
++/*
++ * Windows ConfigMipiClk for the front receiver (traced on SP7 by
++ * georgemihaila/sp7-ipu4-camera) writes 0x30<-0, 0x34<-clk,
++ * 0x38+8i<-0, 0x3c+8i<-data: termen/settle pairs 4 bytes past this
++ * driver's TERMEN/SETTLE defines. Written for the active lanes only;
++ * the 8-lane version walks into other registers and kills ISYS.
++ */
++static bool sb3_front_win_timing;
++module_param(sb3_front_win_timing, bool, 0644);
++MODULE_PARM_DESC(sb3_front_win_timing,
++		 "SB3 front: Windows receiver delay layout (clk/data ticks)");
++
++/*
++ * NOF_ENABLED_LANES is documented as "lanes - 1", but this driver
++ * writes raw nlanes. Override for the front port; -1 = raw nlanes.
++ */
++static int sb3_front_lane_reg = -1;
++module_param(sb3_front_lane_reg, int, 0644);
++MODULE_PARM_DESC(sb3_front_lane_reg,
++		 "SB3 front: NOF_ENABLED_LANES value (-1 = nlanes)");
++
+ static void ipu4p_csi2_write_settle(struct ipu_isys_csi2 *csi2,
+ 				    unsigned int nlanes,
+ 				    unsigned int clk_ticks,
+@@ -139,6 +160,27 @@
+ 		 nlanes);
+ }
+ 
++static void ipu4p_csi2_apply_sb3_front_win_timing(struct ipu_isys_csi2 *csi2,
++						  unsigned int nlanes)
++{
++	unsigned int i;
++
++	if (!sb3_front_win_timing || csi2->index != 2)
++		return;
++	if (nlanes > 4)
++		nlanes = 4;
++	writel(0, csi2->base + 0x30);
++	writel(sb3_front_clk_ticks, csi2->base + 0x34);
++	for (i = 0; i < nlanes; i++) {
++		writel(0, csi2->base + 0x38 + i * 8);
++		writel(sb3_front_data_ticks, csi2->base + 0x3c + i * 8);
++	}
++	dev_info(&csi2->isys->adev->dev,
++		 "csi2-%u: SB3 front Windows timing (%u/%u) lanes=%u\n",
++		 csi2->index, sb3_front_clk_ticks, sb3_front_data_ticks,
++		 nlanes);
++}
++
+ static int ipu4p_csi2_ev_correction_params(struct ipu_isys_csi2
+ 					   *csi2, unsigned int lanes)
+ {
+@@ -330,6 +372,8 @@
+ 	 * caused STREAM_OPEN timeout — sensor never got s_stream.
+ 	 */
+ 	lane_reg = nlanes;
++	if (csi2->index == 2 && sb3_front_lane_reg >= 0)
++		lane_reg = sb3_front_lane_reg;
+ 
+ 	/* Front: do not enable RX on leftover HS (0x302) — 0 frames + flood IRQ. */
+ 	if (csi2->index == 2) {
+@@ -372,6 +416,7 @@
+ 			     csi2->base + CSI2_REG_CSI_RX_DLY_CNT_SETTLE_DLANE(i));
+ 		}
+ 		ipu4p_csi2_apply_sb3_front_settle(csi2, nlanes);
++		ipu4p_csi2_apply_sb3_front_win_timing(csi2, nlanes);
+ 	}
+ 
+ 	val = readl(csi2->base + CSI2_REG_CSI_RX_CONFIG);

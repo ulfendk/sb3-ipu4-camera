@@ -1,0 +1,31 @@
+Subject: [PATCH] media: ipu4p: configure PHY building block 10 (SB3 front)
+
+--- a/drivers/media/pci/intel/ipu4/ipu4-isys.c	2026-10-22 12:05:23.948801774 +0200
++++ b/drivers/media/pci/intel/ipu4/ipu4-isys.c	2026-10-22 12:05:23.973664379 +0200
+@@ -148,15 +148,24 @@
+ {
+ 	void __iomem *isp_base = isys->adev->isp->base;
+ 	unsigned int i, val;
+-	unsigned int bbconfig[4][4] = {
++	unsigned int bbconfig[][4] = {
+ 		{4, 13, 32, 0xf},
+ 		{6, 13, 32, 0x15},
+ 		{12, 13, 32, 0xf},
+ 		{14, 13, 32, 0x15},
++		/*
++		 * Surface Book 3 / Pro 7: front ov5693 (CSI-2 2, x2) sits on
++		 * building block 10, which Intel's list leaves unconfigured —
++		 * its AFE never powers up and the receiver sees neither LP nor
++		 * HS (hs=0 lp=0). Values from ruslanbay/ipu4-drivers
++		 * ConsultingFuture4200 0049, verified stable on SP7. Do NOT add
++		 * bb 8 the same way: it injects DPHY sync errors on bb 10.
++		 */
++		{10, 13, 32, 0x15},
+ 	};
+ 
+ 	/* Config building block */
+-	for (i = 0; i < 4; i++) {
++	for (i = 0; i < ARRAY_SIZE(bbconfig); i++) {
+ 		unsigned int bb = bbconfig[i][0];
+ 		unsigned int crc = bbconfig[i][1];
+ 		unsigned int drc = bbconfig[i][2];

@@ -1,0 +1,9 @@
+post_install() {
+  echo ">> Enable with: systemctl enable --now sb3-ipu4-cameras.service surface-webcam.service"
+  echo ">> If v4l2loopback is already loaded, reload it to get the 7 Surface devices:"
+  echo ">>   modprobe -r v4l2loopback && modprobe v4l2loopback"
+}
+
+post_upgrade() {
+  post_install
+}

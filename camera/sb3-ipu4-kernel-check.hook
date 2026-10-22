@@ -1,0 +1,11 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = linux-surface
+Target = linux-surface-ipu4
+
+[Action]
+Description = Checking linux-surface-ipu4 against linux-surface...
+When = PostTransaction
+Exec = /usr/lib/sb3-ipu4/kernel-check.sh

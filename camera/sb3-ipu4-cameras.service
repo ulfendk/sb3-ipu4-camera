@@ -1,0 +1,14 @@
+[Unit]
+Description=Surface Book 3 IPU4P camera bring-up
+ConditionKernelVersion=*surface-ipu4*
+After=systemd-modules-load.service local-fs.target
+After=display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/sb3-ipu4/sb3-ipu4-cameras.sh
+RemainAfterExit=yes
+TimeoutStartSec=180
+
+[Install]
+WantedBy=multi-user.target

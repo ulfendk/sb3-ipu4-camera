@@ -1,0 +1,455 @@
+# Maintainer: Maximilian Luz <m@mxnluz.io>
+# Maintainer: Blaž Hrastnik <blaz@mxxn.io>
+# Maintainer: Jan Alexander Steffens (heftig) <heftig@archlinux.org>
+
+pkgbase=linux-surface-ipu4
+pkgver=7.2.11.arch1
+pkgrel=1
+pkgdesc='Linux (Surface Book 3 IPU4P cameras)'
+url='https://github.com/archlinux/linux'
+arch=(
+  x86_64
+)
+license=(GPL-2.0-only)
+makedepends=(
+  bc
+  binutils
+  cpio
+  gettext
+  glibc
+  libelf
+  libgcc
+  openssl
+  pahole
+  perl
+  python
+  tar
+  xxhash
+  xz
+  zlib
+  zstd
+  # ignoring deps for docs because we don't build docs package
+)
+optdepends=(
+  'iptsd: Touchscreen support'
+  'linux-firmware: Firmware files for Linux'
+  'linux-firmware-marvell: Firmware files for Marvell WiFi / Bluetooth'
+)
+options=(
+  !debug
+  !strip
+)
+_srcname=linux-${pkgver%.*}
+_srctag=v${pkgver%.*}-${pkgver##*.}
+source=(
+  https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/${_srcname}.tar.{xz,sign}
+  $url/releases/download/$_srctag/linux-$_srctag.patch.zst{,.sig}
+  surface.config # surface specific options
+  arch.config    # config changes for linux-surface kernel
+  0001-secureboot.patch
+  0002-surface3.patch
+  0003-mwifiex.patch
+  0004-ath10k.patch
+  0005-ipts.patch
+  0006-ithc.patch
+  0007-surface-sam.patch
+  0008-surface-sam-over-hid.patch
+  0009-surface-button.patch
+  0010-surface-typecover.patch
+  0011-surface-shutdown.patch
+  0012-surface-gpe.patch
+  0013-cameras.patch
+  0014-amd-gpio.patch
+  0015-hid-surface.patch
+  100-ipu4-media-intel-Add-IPU4-input-and-processing-system-dri.patch
+  101-ipu4-media-intel-Add-Kconfig-and-Makefile-for-IPU4-and-IP.patch
+  102-ipu4-media-intel-ipu4-modify-IPU4-related-headers.patch
+  103-ipu4-media-intel-ipu4-Remove-legacy-crlmodule-header-depe.patch
+  104-ipu4-media-intel-ipu4-Remove-kernel-version-compatibility.patch
+  105-ipu4-media-intel-ipu4-Fix-Bayer-format-propagation-and.patch
+  106-ipu4-media-intel-ipu4-Track-DMA-allocations-with-internal.patch
+  107-ipu4-media-v4l2-Rename-CSI-2-frame-descriptor-fields-to-a.patch
+  108-ipu4-media-intel-ipu4-Use-generic-DMA-API-instead-of-PCI-.patch
+  109-ipu4-media-intel-ipu4-Update-to-new-media-pad-lookup-API.patch
+  110-ipu4-media-intel-ipu4-Use-media_entity_pipeline-accessor-.patch
+  111-ipu4-media-intel-ipu4-Implement-virtual-channel-aware-pip.patch
+  112-ipu4-media-intel-ipu4-Replace-dma_buf_map-with-iosys_map-.patch
+  113-ipu4-media-intel-ipu4-Pass-entity-directly-to-media_graph.patch
+  114-ipu4-media-intel-ipu4-Integrate-IPU-ISYS-with-ipu-bridge-.patch
+  115-ipu4-media-intel-ipu4-Advertise-media-controller-capabili.patch
+  116-ipu4-media-v4l2-Add-descriptions-for-vector-Bayer-pixel-f.patch
+  117-ipu4-media-intel-ipu4-Use-multiplanar-buffer-type-for-for.patch
+  118-ipu4-media-intel-ipu4-Implement-frame-size-enumeration-VI.patch
+  119-ipu4-media-intel-ipu4-Simplify-DMA-buffer-allocation-with.patch
+  120-ipu4-media-intel-ipu4-Simplify-DMA-buffer-deallocation-wi.patch
+  121-ipu4-media-intel-ipu4-Use-dma_map_sgtable-helpers-for-sca.patch
+  122-ipu4-media-intel-ipu4-Use-v4l2_get_link_freq-helper-for-C.patch
+  123-ipu4-media-intel-ipu4-Replace-strlcpy-with-safer-strscpy-.patch
+  124-ipu4-media-intel-ipu4-Use-noop_llseek-instead-of-deprecat.patch
+  125-ipu4-media-intel-ipu4-Update-from_timer-to-timer_containe.patch
+  126-ipu4-media-intel-ipu4-Update-try_to_del_timer_sync-to-tim.patch
+  127-ipu4-media-intel-ipu4-Update-get_user_pages-call-to-match.patch
+  128-ipu4-media-intel-ipu4-Convert-MODULE_IMPORT_NS-to-string-.patch
+  129-ipu4-media-intel-ipu4-Update-set_routing-callback-to-matc.patch
+  130-ipu4-media-intel-ipu4-Modernize-user-page-pinning-with-pi.patch
+  131-ipu4-media-intel-ipu4-Adapt-to-v4l2_get_link_freq-API-sig.patch
+  132-ipu4-media-intel-ipu4-Use-v4l2_async_connection-for-async.patch
+  133-ipu4-media-intel-ipu4-Update-ipu_bus_match-signature-for-.patch
+  134-ipu4-media-intel-ipu4-Update-v4l2_async_nf_init-call-with.patch
+  135-ipu4-media-intel-ipu4-Adapt-to-v4l2_async_nf_register-API.patch
+  136-ipu4-media-intel-ipu4-Update-to-new-v4l2_subdev_state-pad.patch
+  137-ipu4-media-v4l2-subdev-Fix-invalid-array-indexing-on-rout.patch
+  138-ipu4-media-intel-ipu4-Guard-cleanup-against-uninitialized.patch
+  139-ipu4-media-intel-ipu4-Handle-uninitialized-format-state-p.patch
+  140-ipu4-media-intel-ipu4-Safely-handle-stream-aware-subdevic.patch
+  141-ipu4-media-intel-ipu4-Initialize-pad-directions-before-me.patch
+  142-ipu4-media-intel-ipu4-Add-guards-for-uninitialized-array-.patch
+  143-ipu4-media-intel-ipu4-Add-link-validation-infrastructure.patch
+  144-ipu4-media-intel-ipu4-Fix-format-enumeration-and-add-mult.patch
+  145-ipu4-media-intel-ipu4-Implement-format-based-link-validat.patch
+  146-ipu4-media-intel-ipu4-Fix-format-table-lookup-priority-in.patch
+  147-ipu4-media-intel-ipu4-Count-video-devices-for-nr_queues-i.patch
+  148-ipu4-media-intel-ipu4-Fix-IPU4P-firmware-port-to-array-in.patch
+  149-ipu4-media-intel-ipu4-Expand-CSI-2-ports-to-support-Surfa.patch
+  150-ipu4-media-intel-ipu4-Use-fwnode_graph_for_each_endpoint-.patch
+  151-ipu4-media-intel-ipu4-Replace-polling-loops-with-readl_po.patch
+  152-ipu4-media-intel-ipu4-Retry-buttress-authentication-on-dr.patch
+  153-ipu4-media-intel-ipu4-Rename-symbols-to-avoid-IPU7-namesp.patch
+  154-ipu4-media-intel-ipu4-Workaround-to-enable-libcamera-simp.patch
+  155-ipu4-media-intel-ipu4-Add-OV5693-debug-instrumentation.patch
+  200-sb3-media-intel-ipu4p-sb3-front-dphy-lock.patch
+  201-sb3-uapi-ipu-use-linux-types.h-for-kernel-hdrtest.patch
+  202-sb3-media-ipu-buttress-clk-determine-rate.patch
+  203-sb3-media-ipu-isys-queue-drop-vb2-wait-ops.patch
+  204-sb3-media-ipu-isys-set-vbq-lock-and-entity-function.patch
+  205-sb3-media-ipu-isys-avoid-vb2_queue_release-on-failed-queue-init.patch
+  206-sb3-media-ipu4p-configure-front-phy-bb10.patch
+  207-sb3-media-ov5693-no-binning-param.patch
+  208-sb3-media-ipu4p-front-win-timing-lane-reg.patch
+  209-sb3-media-ipu4p-front-err-irq-param.patch
+  ipu4.config
+  ipu4-20191030.bin
+  LICENSE.ipu4-firmware
+  linux-surface-ipu4.modprobe.conf
+)
+source_x86_64=(config.x86_64)
+validpgpkeys=(
+  ABAF11C65A2970B130ABE3C479BE3E4300411886  # Linus Torvalds
+  647F28654894E3BD457199BE38DBBDC86092693E  # Greg Kroah-Hartman
+  83BC8889351B5DEBBB68416EB8AC08600F108CDF  # Jan Alexander Steffens (heftig)
+)
+
+
+
+sha256sums=('fd0fc479f983a8c05313f13e9c36330fe6651cf725396748c40d5cd93fa1e6a4'
+            'SKIP'
+            '741d473c4db335d97d9e1d9b8be9337090522550804fe6454ba336d21e580fd6'
+            'SKIP'
+            '0f81da33cc04ee29f01744d0c10ce3fc771703d67122620118a042ea20837e8f'
+            '008e37de7e6cf8b9479ef0f0f425a25092646e85d741aedd056e5ff3e1096361'
+            'e1ced3a0d583863b11e904b6be39490af8adfe2fea2365a1e991242f1daaa4d0'
+            'bdd509a476a8f9d124776df0f46fac9b3b0382acfe18348560cc7cd2fe143ff8'
+            '87fb417ab30f61358fcac50ae1c0281d1979f993f200ab61a4380c7fa3ec90a5'
+            '83bf1dccd198e69e7b492b7aa6c6cd6a90df3678dc19529a3e9260d69da6f998'
+            'edd62aefaafeda12bf5416cded57607330dbe35cd8850ce8d346ab3ffc6c0012'
+            'c4f8d494d1fa497a8f3efb62aad16cbd0f34fe928fe7ec87a456975d2b198222'
+            '3dec50305c7b0ff716acfb99f19b1eaf57d888de728ec46c2e82a799a062ebf3'
+            '7eb42daa6797cc7c1b4fb09e326e0b86a3cb164fc44b34687aa7aef7ee8380f1'
+            'fbbc49bcde06a3b12ee1774de8ced650ec5a17e07dcbf8d9494110387c6b3f7d'
+            '3d22ee2ce1d6c7827ec075081b5bd0ee713f72a1da406d0cc99f42b9fdd6272d'
+            'e6fb40eaeb4910a7bff2039609691cb6ff99b7728af615a2e984b2e7299fc7ca'
+            '0866c184f01ac1425cdfad911bdd3bef3afb76190a40dd3cc0a7073390f70696'
+            '1f5f2d90a726030efc3583cea2e6afade0a412f50557c370cdc301bca906062a'
+            'a84f93b20b0ee321f33949fa8efbeb0feda124b739da753c90005d7d52ecfa71'
+            '676091e1ef9881b44a92f4e55e6580fcfd04f477acf77de600eb8cbe19b39699'
+            'cf3462b89dd5451b4c947937ae564ea80e02cf4a310ecc476f7b9c752bea599e'
+            'e708d95e965050475b0cf1d97ea68f32d46989eb025f51ad94e119a199007f2c'
+            '22f47f9f7e2c88f510fe87792e363669c59d19df37e08935ce76ec9c2e0782ae'
+            '223768e80db7ed366f6e8711de1f663b80a1d841833e4b087ee318f94bbc7d26'
+            'ed40248a49673a6b52719fab54f49e475169422983ece01f2fab1e106d307310'
+            '4a2b3d7aa0f5106d5ed1a38974558468e77f88cd5508a76f4fdbcebf7152238f'
+            '3cd3dd22e5cfafa01d968e2fcd7cde1fcf27727fade28377a72f527f0474f186'
+            '5d04820608b28a972111754601be05dc21d113267104278ea56ba3702c5cc3c3'
+            '78c9d082f85f860c05d985dc6814f24f557a724ccbbacf0e2b0a1eeb96814fe0'
+            '284edfa7c5cf0be5218cfe2c7cda26a6badc6ddfee42abf868cb98e03dfb4294'
+            'e79f18aee7a62603cdbb516966ab6b106914f7bd20e5440e5ad4ab1c353e0c6a'
+            '458b35a2051fe85163073399143e685aa70bb9b79ee169af19aff3bd39726cd9'
+            '315a7e55e4c503e90aa5ecf174a2bba39d7dbea4ec797e385b6df4ab5225fd7f'
+            '32db3035548fe8aaf47c8fc1a737c7e0d08b4ba2ea1cc541e11b12650fbe998f'
+            '5174031b9d999a569bdddd83fa95843420c9b320017a184908d51c9b465a29cf'
+            'd79be1c89a111f63e474a7ee089ad2140fd904afd60ffc6aa3e7b100d7b2b091'
+            'a5eb7460c4e478b8c9cdd5cb2a6ab191a4675909d7482229ee82205097e5dccd'
+            '93ca9acb0c00e5ab509225f5d66b656093a9bc9751f69bbdbb8c433c9d9f7cfe'
+            '76ad195a212f2fd525c5cad483e960adcbd8bf0a15e8f340cf0265c14783fb30'
+            '3c187ecbd3d9713635a822527b501e05f0650ff6cc034f639a8f595a8f2eb609'
+            '6ffc14c8e5a74bc9b771294d516e633b4a48b7958a115c47d5d42a779df58125'
+            '04457a636592c85c46f1d0b3440dbf94a03623643b3c54d9eff17d96b6b13b8b'
+            '817af9f7660286ec52770bd81f8fa3b3574168a82297957873b2a5cf37f35e7a'
+            '062cb338a83a9035ac3e81980d9782e8c6e60d02903801981eb90073ab694c90'
+            '5c897d653ac662a9ef878f6ab61fb9334d05a912da28910a4801af23d485a870'
+            '3eb927306181c467bd370bb056c4bcaf2c2c73ae4d7a0a63b5ef1c37ddee7183'
+            '9184ed14c945573805313a9ed15a20edc579a0f5ee81f1902732192a68d6654f'
+            '7ad62cfd812104ae2b4828efc827a27773530fb32b37595b92bc44c045e70b7b'
+            '67fb27bfd83c5f04ba43ed302aa89c187bb9fcd687ead54d940fc7f305115272'
+            'b04437a51d2ee2f32096e8963d46c7a12ef7b530acb7106768c1ccaecaeba913'
+            '4332acc603860c53f55217a709cf9f79f95f323c59b8f83ff694dc3f5e6a1cca'
+            '832be0053b00b4a4cc2c761b34aa56b79246cbdf0d0e5e077e1aa3798e229c07'
+            '840c2e1d61fdfb262550976f7a0628b1fc0f73e0294ddeddfe946e7eca734763'
+            '52cad03001e3fd68a807f1149ef5a355118eb1995534583ffe8b341434242cc9'
+            '8a3ba6130c468acbb2b98798199ce694cc86587940288d74f515d8dbb11c02a0'
+            'd94ed2dc1c91128637155bd73efb711f5db1baf1bf0014b054add4a6ae7f4e52'
+            'ce1e5550254baca6360e9c27a924414217f4d8b2a75b688d083c4ae299e6f1d9'
+            '0052e4b656c920d0667b0754ab720284fe5960c7d7322a611e744a0d55d2f507'
+            'ec5118148d11eab238c9749911d5d72d711f0ed49a63ced2e60fb80a44c14125'
+            'a40c1817304e9826b9697e45fb01be263da4dcc054de876c9cd4b9ec36331b8a'
+            'c2617ccbabb0c1dc3962ccb6cfd8a917ac3580074d27b6ac0a9f725c7417edcd'
+            '1dae790bd2ab7c9fa169b49050044f8cf6e359c8139038cb5760e4f7d4786a32'
+            '1edaa8d708b087996a2149169f62f896d41eccccfa276825c79b18e30644ed0f'
+            'bbe074b7361ec916319a150d7ac7ca4eebca640d2fbfd013cbe6f1f04395928e'
+            '13657d48ce2b5c1ae3d39969e2854edb79d5ed174c0e6d4bc254629c92a0a1e0'
+            'a1907037ec1bd0fcf9c0cbba8e2241ff3149953b89bc9b0ddc84232991a88336'
+            '3e700c5dfdaba54cd6a5fd87bbff4b57fe1b3c459c43a870e2726160bf2dcaa1'
+            'c48d9d0538971cd074f835b1db3ae379ca209ddac7c87197e3bf5c573941aca3'
+            '3e905ed329d3d7d778d68742dd6c25f44e584b1803ef8429e6d4dbb576608c60'
+            'd3fddabba302dbc93f99dd2e7b148f18ff3d9f8e2a8c15fa1ce95b19323ecf09'
+            '3a6322caf6049762fa44d4195f97a769707889734f51b12b309ae917da03fde9'
+            'e83044ade21a2373e1d2d2d6f2912c2657a0e4ee437196e546d0f8dc77ee9b26'
+            '6780ae77ce8aedd87e7b3addf8aaf8aed6ae77fdf1c3b78429dc4e7a2743f6ea'
+            'fae58c6f6028dd64ef3916313511afb2d251c72ca2281e3205c500e89838f1da'
+            'a594ca45dc0d2a5578cf97b271157ee79e204b80447f3378d0fe1cd9f97deb2c'
+            'c25ad5080c77ac9bf21fe067ad8370c10b77ddfb090d3bc778971ea15700e784'
+            '132adf4f0406f5eb8616422e689829076a6ecf344888e86467649c46c902f461'
+            '5f77b8b50c615028afbe92520da4f5da2d00dd5eacf712e8e0629da0ce18dcf5'
+            'b4780e869b5047112da7a53a24579e08e8d084ad9e22a8a0d6908d0d1b7a3960'
+            '76da9da5e7b2674dc926df99d96c6106f77dff945fdd8135effef62ed89c7017'
+            '8dec55de354d4501e55d59564f6f5271b5da1f5a5f615677497a4e867fe11c57'
+            'c865e2813ca1f347659b1f6b135c0c96507f37dc6bc38b0f0b62ad5877e317ff'
+            'aa868f00cf9bca2355e7f9a810ee5e5d430766aa52eca72a10aebbe070f34827'
+            '081cef646547027b10c9d0103ea9aad700d79f9d3a7c9dec3d47ee29d6e95b92'
+            'c10e41a69244a2e56511764cd5e645eefae776854718a490b1c9f18dad7c7777'
+            'ed4f96472af56b763fd6a98edf196e87685739141823f7bbe77b82215561b20c'
+            'c93e1463ab21b6e782baa4cd64304382ed9aa1a27784f7a6f8cc267560a2fdf0'
+            'ff2c36cc81a5c726508b22970c2e2538ff06107dc5a72c93401403c227e5157f'
+            '22324f462d5c82e0ea4e265413af7b019454e478112822d21ed0c65eb3cb3cc2'
+            '6dacb73577b53a5fe77eaae1d4ad2124fd3a2201a25c3e3fbe227965622dd2d4')
+sha256sums_x86_64=('f16adcb6dc1dc241ea90e23ca920697d00e4618df1b72d914ff15bc55ab4051f')
+
+export KBUILD_BUILD_HOST=archlinux
+export KBUILD_BUILD_USER=$pkgbase
+export KBUILD_BUILD_TIMESTAMP="$(date -Ru${SOURCE_DATE_EPOCH:+d @$SOURCE_DATE_EPOCH})"
+
+# optional certificate and key for secure boot signing
+_mok_crt="$PWD/MOK.crt"
+_mok_key="$PWD/MOK.key"
+
+prepare() {
+  cd $_srcname
+
+  echo "Setting version..."
+  echo "-$pkgrel" > localversion.10-pkgrel
+  echo "${pkgbase#linux}" > localversion.20-pkgname
+
+  local src
+  for src in "${source[@]}"; do
+    src="${src%%::*}"
+    src="${src##*/}"
+    src="${src%.zst}"
+    [[ $src = *.patch ]] || continue
+    echo "Applying patch $src..."
+    patch -Np1 < "../$src"
+  done
+
+  echo "Setting config..."
+  ./scripts/kconfig/merge_config.sh -m ../config.$CARCH ../surface.config ../arch.config ../ipu4.config
+  make olddefconfig
+  diff -u ../config.$CARCH .config || :
+
+  make -s kernelrelease > version
+  echo "Prepared $pkgbase version $(<version)"
+}
+
+build() {
+  cd $_srcname
+
+  make all
+}
+
+_package() {
+  pkgdesc="The $pkgdesc kernel and modules"
+  depends=(
+    coreutils
+    initramfs
+    kmod
+  )
+  optdepends=(
+    "$pkgbase-headers: headers and scripts for building modules"
+    'linux-firmware: firmware images needed for some devices'
+    'scx-scheds: to use sched-ext schedulers'
+    'wireless-regdb: to set the correct wireless channels of your country'
+  )
+  provides=(
+    KSMBD-MODULE
+    NTSYNC-MODULE
+    VIRTUALBOX-GUEST-MODULES
+    WIREGUARD-MODULE
+  )
+  replaces=(
+    virtualbox-guest-modules-arch
+    wireguard-arch
+  )
+
+  cd $_srcname
+  local modulesdir="$pkgdir/usr/lib/modules/$(<version)"
+  local image_name="$(make -s image_name)"
+
+  # sign boot image if the prequisites are available
+  if [[ -f "$_mok_crt" ]] && [[ -f "$_mok_key" ]] && [[ -x "$(command -v sbsign)" ]]; then
+    echo "Signing boot image..."
+    sbsign --key "$_mok_key" --cert "$_mok_crt" --output "$image_name" "$image_name"
+  fi
+
+  echo "Installing boot image..."
+  # systemd expects to find the kernel here to allow hibernation
+  # https://github.com/systemd/systemd/commit/edda44605f06a41fb86b7ab8128dcf99161d2344
+  install -Dm644 "$image_name" "$modulesdir/vmlinuz"
+
+  # Used by mkinitcpio to name the kernel
+  echo "$pkgbase" | install -Dm644 /dev/stdin "$modulesdir/pkgbase"
+
+  echo "Installing modules..."
+  ZSTD_CLEVEL=19 make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 \
+    DEPMOD=/doesnt/exist modules_install  # Suppress depmod
+
+  # remove build link
+  rm "$modulesdir"/build
+
+  echo "Installing IPU4P firmware and modprobe config..."
+  install -Dm644 ../ipu4-20191030.bin "$pkgdir/usr/lib/firmware/ipu4p_cpd.bin"
+  install -Dm644 ../LICENSE.ipu4-firmware "$pkgdir/usr/share/licenses/$pkgname/LICENSE.ipu4-firmware"
+  install -Dm644 ../linux-surface-ipu4.modprobe.conf "$pkgdir/usr/lib/modprobe.d/linux-surface-ipu4.conf"
+}
+
+_package-headers() {
+  pkgdesc="Headers and scripts for building modules for the $pkgdesc kernel"
+  depends=(
+    binutils
+    glibc
+    libelf
+    libgcc
+    openssl
+    pahole
+    xxhash
+    zlib
+    zstd
+  )
+  provides=(LINUX-HEADERS)
+
+  cd $_srcname
+  local builddir="$pkgdir/usr/lib/modules/$(<version)/build"
+
+  local karch
+  case $CARCH in
+    x86_64) karch=x86 ;;
+    *) echo "Unknown CARCH $CARCH"; exit 1 ;;
+  esac
+
+  echo "Installing build files..."
+  install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
+    localversion.* version vmlinux
+  install -Dt "$builddir/kernel" -m644 kernel/Makefile
+  install -Dt "$builddir/arch/$karch" -m644 arch/$karch/Makefile
+  cp -t "$builddir" -a scripts
+  ln -srt "$builddir" "$builddir/scripts/gdb/vmlinux-gdb.py"
+
+  if [[ $(scripts/config -s CONFIG_HAVE_STACK_VALIDATION) = y ]]; then
+    install -Dt "$builddir/tools/objtool" tools/objtool/objtool
+  fi
+
+  if [[ $(scripts/config -s CONFIG_DEBUG_INFO_BTF_MODULES) = y ]]; then
+    install -Dt "$builddir/tools/bpf/resolve_btfids" tools/bpf/resolve_btfids/resolve_btfids
+  fi
+
+  echo "Installing headers..."
+  cp -t "$builddir" -a include
+  cp -t "$builddir/arch/$karch" -a arch/$karch/include
+  install -Dt "$builddir/arch/$karch/kernel" -m644 arch/$karch/kernel/asm-offsets.s
+
+  install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
+  install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
+
+  # https://bugs.archlinux.org/task/13146
+  install -Dt "$builddir/drivers/media/i2c" -m644 drivers/media/i2c/msp3400-driver.h
+
+  # https://bugs.archlinux.org/task/20402
+  install -Dt "$builddir/drivers/media/usb/dvb-usb" -m644 drivers/media/usb/dvb-usb/*.h
+  install -Dt "$builddir/drivers/media/dvb-frontends" -m644 drivers/media/dvb-frontends/*.h
+  install -Dt "$builddir/drivers/media/tuners" -m644 drivers/media/tuners/*.h
+
+  # https://bugs.archlinux.org/task/71392
+  install -Dt "$builddir/drivers/iio/common/hid-sensors" -m644 drivers/iio/common/hid-sensors/*.h
+
+  echo "Installing KConfig files..."
+  find . -name 'Kconfig*' -exec install -Dm644 {} "$builddir/{}" \;
+
+  if [[ $(scripts/config -s CONFIG_RUST) = y ]]; then
+    echo "Installing Rust files..."
+    install -Dt "$builddir/rust" -m644 rust/*.rmeta
+    install -Dt "$builddir/rust" rust/*.so
+  fi
+
+  echo "Installing unstripped VDSO..."
+  make INSTALL_MOD_PATH="$pkgdir/usr" vdso_install \
+    link=  # Suppress build-id symlinks
+
+  echo "Removing unneeded architectures..."
+  local arch
+  for arch in "$builddir"/arch/*/; do
+    [[ $arch = */$karch/ ]] && continue
+    echo "Removing $(basename "$arch")"
+    rm -r "$arch"
+  done
+
+  echo "Removing documentation..."
+  rm -r "$builddir/Documentation"
+
+  echo "Removing broken symlinks..."
+  find -L "$builddir" -type l -printf 'Removing %P\n' -delete
+
+  echo "Removing loose objects..."
+  find "$builddir" -type f -name '*.o' -printf 'Removing %P\n' -delete
+
+  echo "Stripping build tools..."
+  local file
+  while read -rd '' file; do
+    case "$(file -Sib "$file")" in
+      application/x-sharedlib\;*)      # Libraries (.so)
+        strip -v $STRIP_SHARED "$file" ;;
+      application/x-archive\;*)        # Libraries (.a)
+        strip -v $STRIP_STATIC "$file" ;;
+      application/x-executable\;*)     # Binaries
+        strip -v $STRIP_BINARIES "$file" ;;
+      application/x-pie-executable\;*) # Relocatable binaries
+        strip -v $STRIP_SHARED "$file" ;;
+    esac
+  done < <(find "$builddir" -type f -perm -u+x ! -name vmlinux -print0)
+
+  echo "Stripping vmlinux..."
+  strip -v $STRIP_STATIC "$builddir/vmlinux"
+
+  echo "Adding symlink..."
+  mkdir -p "$pkgdir/usr/src"
+  ln -sr "$builddir" "$pkgdir/usr/src/$pkgbase"
+}
+
+pkgname=(
+  "$pkgbase"
+  "$pkgbase-headers"
+)
+for _p in "${pkgname[@]}"; do
+  eval "package_$_p() {
+    $(declare -f "_package${_p#$pkgbase}")
+    _package${_p#$pkgbase}
+  }"
+done
+
+# vim:set ts=8 sts=2 sw=2 et:
