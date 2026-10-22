@@ -63,7 +63,7 @@ the first patch that fails.
 `/etc/default/surface-webcam` (read by `surface-webcam.service`):
 
 ```sh
-SURFACE_WEBCAM_WARMTH=0.06   # front white-balance tilt: 0 neutral, ~0.15 warm
+SURFACE_WEBCAM_WARMTH=0.10   # front white-balance tilt: 0 neutral, ~0.15 warm
 ```
 
 ## Patches

@@ -50,7 +50,7 @@ def _env_float(name: str, default: float) -> float:
 
 # Grey world makes the scene average exactly neutral, which reads as cold.
 # Warmth tilts the display gains: R x (1 + w), B x (1 - w). 0 = neutral.
-WARMTH = _env_float("SURFACE_WEBCAM_WARMTH", 0.06)
+WARMTH = _env_float("SURFACE_WEBCAM_WARMTH", 0.10)
 _WARM = np.array([1.0 - WARMTH, 1.0, 1.0 + WARMTH])  # B, G, R
 
 # Mosaic sites for OpenCV's COLOR_BayerRG2BGR: (row, col) -> B/G/R index.

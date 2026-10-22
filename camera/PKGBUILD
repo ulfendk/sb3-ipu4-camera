@@ -1,6 +1,6 @@
 pkgname=sb3-ipu4-cameras
 pkgver=0.2
-pkgrel=8
+pkgrel=9
 pkgdesc='Surface Book 3 IPU4P camera bring-up and webcams for linux-surface-ipu4'
 arch=(x86_64)
 license=(GPL-2.0-only)
